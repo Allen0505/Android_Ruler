@@ -41,9 +41,7 @@ public class MainActivity extends AppCompatActivity {
         mRulerView.setValueChangeListener(new RulerView.OnValueChangeListener(){
             @Override
             public void onValueChange(int intVal, float fltval) {
-
                 mTextView.setText(mDf.format(intVal+fltval));
-                //Log.d("DEBUG",intVal+" "+fltval);
             }
         });
     }

@@ -59,7 +59,7 @@ public class RulerView extends View {
     //往左边去能偏移的最大值
     private float mLeftOffset;
     //移动的距离
-    private float mMoveX = 10f;
+    private float mMoveX = 0f;
 
     private float mWidth, mHeight;//控件的长宽
 
@@ -81,6 +81,9 @@ public class RulerView extends View {
 
     }
 
+    /**
+     * 初始化参数值
+     */
     private void initAttrs(Context context, AttributeSet attrs) {
         // 开启硬件加速
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -98,7 +101,8 @@ public class RulerView extends View {
         mOriginValue = typedArray.getInteger(R.styleable.RulerView_start_location, 50);
         mShortLineHeight = typedArray.getDimensionPixelOffset(R.styleable.RulerView_shortline_length, 9);
         mHighLineHeight = typedArray.getDimensionPixelOffset(R.styleable.RulerView_heightline_length, 18);
-
+        recaculate();
+        invalidate();
     }
 
     public RulerView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -113,7 +117,8 @@ public class RulerView extends View {
         initValue();
 
         initPaint();
-
+        recaculate();
+        invalidate();
     }
 
     private void initPaint() {
@@ -264,7 +269,7 @@ public class RulerView extends View {
 
                 } else {
                     mMoveX += off;
-                    postInvalidate();
+                    postInvalidate();//异步刷新UI
                 }
 
                 break;
@@ -290,13 +295,14 @@ public class RulerView extends View {
         isCancel = false;
         float smallWidth = mPartitionWidth / mSmallPartitionCount;
         float neededMoveX;
+        //四舍五入判断距离最近的刻度执行动画
         if (mMoveX < 0) {
             neededMoveX = (int) (mMoveX / smallWidth - 0.5f) * smallWidth;
         } else {
             neededMoveX = (int) (mMoveX / smallWidth + 0.5f) * smallWidth;
         }
         animator = new ValueAnimator().ofFloat(mMoveX, neededMoveX);
-        animator.setDuration(1000);
+        animator.setDuration(500);//动画延迟500ms
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -339,6 +345,7 @@ public class RulerView extends View {
         if (mScroller.computeScrollOffset()) {
             float off = mScroller.getFinalX() - mScroller.getCurrX();
             off = off * functionSpeed();
+            //判断左划还是右划
             if ((mMoveX <= mRightOffset) && off < 0) {
                 mMoveX = mRightOffset;
             } else if ((mMoveX >= mLeftOffset) && off > 0) {
@@ -348,8 +355,8 @@ public class RulerView extends View {
                 if (mScroller.isFinished()) {
                     startAnim();
                 } else {
-                    postInvalidate();
                     mLastX = mScroller.getFinalX();
+                    postInvalidate();
                 }
             }
 
@@ -364,7 +371,6 @@ public class RulerView extends View {
 
     /**
      * 控制滑动速度
-     *
      * @return
      */
     private float functionSpeed() {
