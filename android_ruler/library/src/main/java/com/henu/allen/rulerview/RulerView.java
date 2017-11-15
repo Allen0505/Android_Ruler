@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -26,76 +27,33 @@ public class RulerView extends View {
     private static final String TAG = RulerView.class.getSimpleName();
 
     private Context mContext;
-
-    /**
-     * 短线的高度
-     */
-    private float mShortLineHeight;
-    /**
-     * 长线的高度
-     */
-    private float mHighLineHeight;
-    /**
-     * 短线的宽度
-     */
-    private float mShortLineWidth;
-    /**
-     * 长线的宽度
-     */
-    private float mHighLineWidth;
-    /**
-     * 两个长线间间隔数量
-     */
-    private int mSmallPartitionCount;
-    /**
-     * 指示器的宽度的一半
-     */
-    private float mIndicatorHalfWidth;
-    /**
-     * 指示器数字距离上边的距离
-     */
-    private float mIndicatorTextTopMargin;
-    /**
-     * 短线长线的上边距
-     */
-    private float mLineTopMargin;
-    /**
-     * 起止数值, 暂定为int
-     */
-    private int mStartValue;
-    private int mEndValue;
-    /**
-     * 两个长线之间相差多少值 暂定为int
-     */
-    private int mPartitionValue;
-    /**
-     * 长线间隔宽度
-     */
-    private float mPartitionWidth;
-    /**
-     * 设置的初始值
-     */
-    private int mOriginValue;
-    private int mOriginValueSmall;
-    /**
-     * 当前值
-     */
-    private int mCurrentValue;
-    /**
-     * 刻度的大小
-     */
-    private int mScaleTextsize;
-    /**
-     * 最小速度
-     */
-    protected int mMinVelocity;
-
-    private Paint mBgPaint;
-    private Paint mShortLinePaint;
-    private Paint mHighLinePaint;
-    private Paint mIndicatorTxtPaint;
-    private Paint mIndicatorViewPaint;
-
+    private float mShortLineHeight;//短线的高度
+    private float mHighLineHeight;//长线的高度
+    private float mShortLineWidth;//短线的宽度
+    private float mHighLineWidth;//长线的宽度
+    private int mSmallPartitionCount;//两个长线间间隔数量
+    private float mIndicatorHalfWidth;//指示器的宽度的一半
+    private float mIndicatorTextTopMargin;//指示器数字距离上边的距离
+    private float mLineTopMargin;//短线长线的上边距
+    private int mMinValue;//起止数值
+    private int mMaxValue;//结束值
+    private int mPartitionValue;//两个长线之间相差多少值
+    private float mPartitionWidth;//长线间隔宽度
+    private int mOriginValue;//设置的初始值
+    private int mOriginValueSmall;//设置初始偏移量
+    private int mCurrentValue;//当前值
+    private int mScaleTextsize;//刻度的大小
+    protected int mMinVelocity;//最小速度
+    private Paint mBgPaint;//背景画笔
+    private Paint mShortLinePaint;//短线画笔
+    private Paint mHighLinePaint;//长线画笔
+    private Paint mIndicatorTextPaint;//数字画笔
+    private Paint mIndicatorViewPaint;//指示器画笔
+    private int mBgColor;//背景颜色
+    private int mTextColor;//数字颜色
+    private int mIndicatorColor;//指示器颜色
+    private int mHighLineColor;//长线颜色
+    private int mShortLineColor;//短线颜色
     //往右边去能偏移的最大值
     private float mRightOffset;
     //往左边去能偏移的最大值
@@ -103,29 +61,44 @@ public class RulerView extends View {
     //移动的距离
     private float mMoveX = 10f;
 
-    private float mWidth, mHeight;
+    private float mWidth, mHeight;//控件的长宽
 
-    private Scroller mScroller;
-    protected VelocityTracker mVelocityTracker;
+    private Scroller mScroller;//滚动计算器
+    protected VelocityTracker mVelocityTracker;//滑动速度追踪器
 
-    private OnValueChangeListener listener;
+    private OnValueChangeListener listener;//设置监听器
 
     public interface OnValueChangeListener {
-        void onValueChange(int intVal, int fltval);
+        void onValueChange(int intVal, float fltval);
     }
-
     public void setValueChangeListener(OnValueChangeListener listener) {
         this.listener = listener;
     }
 
-    public RulerView(Context context) {
-        this(context, null);
+    public RulerView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+        initAttrs(context,attrs);
 
     }
 
-    public RulerView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+    private void initAttrs(Context context, AttributeSet attrs) {
+        // 开启硬件加速
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.RulerView);
+        mMaxValue = typedArray.getInteger(R.styleable.RulerView_max_value, 100);
+        mMinValue = typedArray.getInteger(R.styleable.RulerView_min_value, 0);
+        mScaleTextsize = typedArray.getDimensionPixelOffset(R.styleable.RulerView_scale_text_size, 44);
+        mTextColor = typedArray.getColor(R.styleable.RulerView_scale_text_color, Color.WHITE);
+        mIndicatorColor = typedArray.getColor(R.styleable.RulerView_tag_color,Color.WHITE);
+        mBgColor = typedArray.getColor(R.styleable.RulerView_background_color, Color.YELLOW);
+        mHighLineColor = typedArray.getColor(R.styleable.RulerView_heightline_color, Color.WHITE);
+        mShortLineColor = typedArray.getColor(R.styleable.RulerView_shortline_color, Color.WHITE);
+        mOriginValue = typedArray.getInteger(R.styleable.RulerView_start_location, 50);
+        mShortLineHeight = typedArray.getDimensionPixelOffset(R.styleable.RulerView_shortline_length, 9);
+        mHighLineHeight = typedArray.getDimensionPixelOffset(R.styleable.RulerView_heightline_length, 18);
+
     }
 
     public RulerView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -136,7 +109,7 @@ public class RulerView extends View {
 
         mMinVelocity = ViewConfiguration.get(getContext())
                 .getScaledMinimumFlingVelocity();
-
+        initAttrs(context,attrs);
         initValue();
 
         initPaint();
@@ -145,22 +118,22 @@ public class RulerView extends View {
 
     private void initPaint() {
         mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBgPaint.setColor(Color.argb(255, 224, 95, 23));
+        mBgPaint.setColor(mBgColor);
 
         mShortLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mShortLinePaint.setColor(Color.WHITE);
+        mShortLinePaint.setColor(mShortLineColor);
         mShortLinePaint.setStrokeWidth(mShortLineWidth);
 
         mHighLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mHighLinePaint.setColor(Color.WHITE);
+        mHighLinePaint.setColor(mHighLineColor);
         mHighLinePaint.setStrokeWidth(mHighLineWidth);
 
-        mIndicatorTxtPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mIndicatorTxtPaint.setColor(Color.WHITE);
-        mIndicatorTxtPaint.setTextSize(mScaleTextsize);
+        mIndicatorTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mIndicatorTextPaint.setColor(mTextColor);
+        mIndicatorTextPaint.setTextSize(mScaleTextsize);
 
         mIndicatorViewPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mIndicatorViewPaint.setColor(Color.WHITE);
+        mIndicatorViewPaint.setColor(mIndicatorColor);
     }
 
     private void initValue() {
@@ -170,17 +143,11 @@ public class RulerView extends View {
         mHighLineWidth = Utils.convertDpToPixel(mContext, 1.67f);
         mShortLineWidth = Utils.convertDpToPixel(mContext, 1.67f);
         mLineTopMargin = Utils.convertDpToPixel(mContext, 0.33f);
-        mHighLineHeight = Utils.convertDpToPixel(mContext, 15.3f);
-        mShortLineHeight = Utils.convertDpToPixel(mContext, 7.3f);
         mIndicatorTextTopMargin = Utils.convertDpToPixel(mContext, 15f);
 
-        mSmallPartitionCount = 3;
-        mOriginValue = 100;
+        mSmallPartitionCount = 10;
         mOriginValueSmall = 0;
         mPartitionValue = 10;
-        mStartValue = 50;
-        mEndValue = 250;
-        mScaleTextsize = 44;
     }
 
     @Override
@@ -202,7 +169,7 @@ public class RulerView extends View {
     }
 
     /**
-     * 画背景
+     * 绘制背景
      * @param canvas
      */
     private void drawBackground(Canvas canvas) {
@@ -210,7 +177,7 @@ public class RulerView extends View {
     }
 
     /**
-     * 画指示器
+     * 绘制指示器
      * @param canvas
      */
     private void drawIndicator(Canvas canvas) {
@@ -232,32 +199,33 @@ public class RulerView extends View {
         mOffset = mMoveX - (int) (mMoveX / mPartitionWidth) * mPartitionWidth;
 
         if (null != listener) {
-            listener.onValueChange(mCurrentValue, -(int) (mOffset / (mPartitionWidth / mSmallPartitionCount)));
+            listener.onValueChange(mCurrentValue, - (mOffset / (mPartitionWidth / mSmallPartitionCount)));
         }
 
         // draw high line and  short line
         for (int i = -halfCount - 1; i <= halfCount + 1; i++) {
             int val = mCurrentValue + i * mPartitionValue;
             //只绘出范围内的图形
-            if (val >= mStartValue && val <= mEndValue) {
+            if (val >= mMinValue && val <= mMaxValue) {
                 //画长的刻度
                 float startx = mWidth / 2 + mOffset + i * mPartitionWidth;
                 if (startx > 0 && startx < mWidth) {
-                    canvas.drawLine(mWidth / 2 + mOffset + i * mPartitionWidth, 0 + mLineTopMargin,
-                            mWidth / 2 + mOffset + i * mPartitionWidth, 0 + mLineTopMargin + mHighLineHeight, mHighLinePaint);
+                    canvas.drawLine(startx, 0 + mLineTopMargin,
+                            startx, 0 + mLineTopMargin + mHighLineHeight, mHighLinePaint);
 
                     //画刻度值
-                    canvas.drawText(val + "", mWidth / 2 + mOffset + i * mPartitionWidth - mIndicatorTxtPaint.measureText(val + "") / 2,
-                            0 + mLineTopMargin + mHighLineHeight + mIndicatorTextTopMargin + Utils.calcTextHeight(mIndicatorTxtPaint, val + ""), mIndicatorTxtPaint);
+                    canvas.drawText(val + "", startx - mIndicatorTextPaint.measureText(val + "") / 2,
+                            0 + mLineTopMargin + mHighLineHeight + mIndicatorTextTopMargin + Utils.calcTextHeight(mIndicatorTextPaint, val + ""), mIndicatorTextPaint);
                 }
 
                 //画短的刻度
-                if (val != mEndValue) {
+                if (val != mMaxValue) {
                     for (int j = 1; j < mSmallPartitionCount; j++) {
-                        float start_x = mWidth / 2 + mOffset + i * mPartitionWidth + j * mPartitionWidth / mSmallPartitionCount;
+                        float location=mWidth / 2 + mOffset + i * mPartitionWidth + j * mPartitionWidth / mSmallPartitionCount;
+                        float start_x = location;
                         if (start_x > 0 && start_x < mWidth) {
-                            canvas.drawLine(mWidth / 2 + mOffset + i * mPartitionWidth + j * mPartitionWidth / mSmallPartitionCount, 0 + mLineTopMargin,
-                                    mWidth / 2 + mOffset + i * mPartitionWidth + j * mPartitionWidth / mSmallPartitionCount, 0 + mLineTopMargin + mShortLineHeight, mShortLinePaint);
+                            canvas.drawLine(location, 0 + mLineTopMargin,
+                                    location, 0 + mLineTopMargin + mShortLineHeight, mShortLinePaint);
                         }
                     }
                 }
@@ -285,7 +253,7 @@ public class RulerView extends View {
                 isActionUp = false;
                 mScroller.forceFinished(true);
                 if (null != animator) {
-                    animator.cancel();
+                   animator.cancel();
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -415,13 +383,13 @@ public class RulerView extends View {
     }
 
     public void setStartValue(int mStartValue) {
-        this.mStartValue = mStartValue;
+        this.mMinValue = mStartValue;
         recaculate();
         invalidate();
     }
 
     public void setEndValue(int mEndValue) {
-        this.mEndValue = mEndValue;
+        this.mMaxValue = mEndValue;
         recaculate();
         invalidate();
     }
@@ -463,8 +431,8 @@ public class RulerView extends View {
 
     private void recaculate() {
         mMoveX = -mOriginValueSmall * (mPartitionWidth / mSmallPartitionCount);
-        mRightOffset = -1 * (mEndValue - mOriginValue) * mPartitionWidth / mPartitionValue;
-        mLeftOffset = -1 * (mStartValue - mOriginValue) * mPartitionWidth / mPartitionValue;
+        mRightOffset = -1 * (mMaxValue - mOriginValue) * mPartitionWidth / mPartitionValue;
+        mLeftOffset = -1 * (mMinValue - mOriginValue) * mPartitionWidth / mPartitionValue;
     }
 }
 

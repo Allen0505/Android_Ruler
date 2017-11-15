@@ -14,6 +14,8 @@ import com.henu.allen.rulerview.RulerView;
 
 import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends AppCompatActivity {
     RulerView mRulerView;
     TextView mTextView;
@@ -21,33 +23,28 @@ public class MainActivity extends AppCompatActivity {
 
     private Fragment mRulerFragment;
     private FragmentTransaction mTransaction;
+    private DecimalFormat mDf;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mContainer = (FrameLayout)findViewById(R.id.framelayout);
+        /*mContainer = (FrameLayout)findViewById(R.id.container);
 
         mRulerFragment = new RulerFragment();
 
         mTransaction = getFragmentManager().beginTransaction();
-        mTransaction.add(R.id.framelayout, mRulerFragment);
-        mTransaction.commit();
-      /*  mRulerView=(RulerView)findViewById(R.id.birthRulerView);
-        mTextView=(TextView)findViewById(R.id.textview);
-        mRulerView.setStartValue(0);
-        mRulerView.setEndValue(10000);
-        mRulerView.setOriginValue(2000);
-        mRulerView.setOriginValueSmall(0);
-        mRulerView.setPartitionWidthInDP(106.7f);
-        mRulerView.setPartitionValue(1000);
-        mRulerView.setSmallPartitionCount(1);
-        mRulerView.setmValue(1990);
+        mTransaction.add(R.id.container, mRulerFragment);
+        mTransaction.commit();*/
+        mRulerView=(RulerView)findViewById(R.id.birthRulerView);
+        mTextView=(TextView)findViewById(R.id.textnumber);
+        mDf=new java.text.DecimalFormat("#.#");
         mRulerView.setValueChangeListener(new RulerView.OnValueChangeListener(){
             @Override
-            public void onValueChange(int intVal, int fltval) {
-               // mTextView.setText(intVal + " " + fltval);
-                Log.d("DEBUG",intVal+" "+fltval);
+            public void onValueChange(int intVal, float fltval) {
+
+                mTextView.setText(mDf.format(intVal+fltval));
+                //Log.d("DEBUG",intVal+" "+fltval);
             }
-        });*/
+        });
     }
 }

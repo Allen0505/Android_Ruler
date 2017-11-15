@@ -7,21 +7,50 @@
     android:orientation="vertical"
     tools:context="com.henu.allen.android_ruler.MainActivity">
 
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="100dp">
+
     <TextView
-        android:id="@+id/textview"
+        android:id="@+id/textnumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
         android:layout_gravity="center"
-        android:textSize="32dp"
+        android:text="50.2"
+        android:textColor="@color/colorRed"
+        android:textSize="65dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-<FrameLayout
-    android:id="@+id/framelayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/textcm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/textnumber"
+        android:layout_toEndOf="@+id/textnumber"
+        android:layout_toRightOf="@+id/textnumber"
+        android:layout_marginLeft="8dp"
+        android:textSize="24dp"
+        android:text="cm" />
+</RelativeLayout>
+
+    <com.henu.allen.rulerview.RulerView
+        android:id="@+id/birthRulerView"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        app:max_value="200"
+        app:min_value="0"
+        app:heightline_length="50dp"
+        app:shortline_length="25dp"
+        app:scale_text_size="18dp"
+        app:start_location="30"
+        android:background="@android:color/holo_blue_light" />
+
+
 
 
 </android.support.v7.widget.LinearLayoutCompat>
