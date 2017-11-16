@@ -54,9 +54,9 @@ public class RulerView extends View {
     private int mIndicatorColor;//指示器颜色
     private int mHighLineColor;//长线颜色
     private int mShortLineColor;//短线颜色
-    //往右边去能偏移的最大值
+    //向右最大偏移量
     private float mRightOffset;
-    //往左边去能偏移的最大值
+    //向左最大偏移量
     private float mLeftOffset;
     //移动的距离
     private float mMoveX = 0f;
