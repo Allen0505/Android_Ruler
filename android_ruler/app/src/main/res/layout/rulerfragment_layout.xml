@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.henu.allen.rulerview.RulerView
+        android:id="@+id/birthRulerView"
+        android:layout_width="match_parent"
+        android:layout_height="76.7dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        app:max_value="100"
+        app:min_value="0"
+        app:heightline_length="50dp"
+        app:shortline_length="25dp"
+        app:scale_text_size="18dp"
+        app:start_location="40"
+        android:background="@android:color/holo_blue_light" />
+
+</LinearLayout>
